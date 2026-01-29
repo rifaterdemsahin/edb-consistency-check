@@ -1,10 +1,12 @@
 # EDB Consistency Check
 
-A PostgreSQL/EnterpriseDB consistency checking tool that runs on Minikube in GitHub Codespaces. This project verifies database data checksums to detect potential storage corruption.
+A PostgreSQL/EnterpriseDB consistency checking tool that runs on Minikube in GitHub Codespaces. This project provides both basic and comprehensive consistency checks to detect potential storage corruption and database health issues.
 
 ## Overview
 
 This project provides:
+- **Basic Check**: Quick data checksums verification
+- **Full Check Suite**: Comprehensive checks including data checksums, table/index integrity, bloat analysis, and VACUUM recommendations
 - Kubernetes deployment configurations for PostgreSQL with data checksums enabled
 - Automated consistency check scripts
 - Easy setup for GitHub Codespaces environment with Minikube
@@ -43,19 +45,28 @@ This script will:
 
 ### 2. Deploy and Run Check
 
-Deploy PostgreSQL and run the consistency check:
+Deploy PostgreSQL and run the basic consistency check:
 
 ```bash
 ./scripts/deploy-and-check.sh
 ```
 
-This script will:
+Or run the full consistency check suite:
+
+```bash
+make deploy
+make check-full
+```
+
+This will:
 - Deploy PostgreSQL with data checksums enabled
 - Wait for the database to be ready
-- Run the consistency check job
+- Run the consistency check job(s)
 - Display the results
 
 ### 3. Expected Output
+
+#### Basic Check (Data Checksums Only)
 
 When checksums are enabled (which they are in this setup), you should see:
 
@@ -74,6 +85,29 @@ Result: on
   This means PostgreSQL will detect data corruption by verifying checksums
   on data pages when they are read from disk.
 ```
+
+#### Full Check Suite
+
+The full check runs multiple checks and provides comprehensive output:
+
+```
+==========================================
+EDB Full Consistency Check Suite
+==========================================
+
+Check 1: Data Checksums (Safe)
+Check 2: Table/Index Integrity
+Check 3: Table Bloat Analysis
+Check 4: VACUUM Recommendations
+
+Checks passed:        3
+Checks with warnings: 0
+Checks failed:        0
+
+✓ All checks passed successfully!
+```
+
+See [FULL_CHECK.md](FULL_CHECK.md) for detailed information on the full check suite.
 
 ## Project Structure
 
