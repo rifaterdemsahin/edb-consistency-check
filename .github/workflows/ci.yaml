@@ -1,0 +1,100 @@
+name: EDB Consistency Check CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  validate:
+    name: Validate Configuration
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'
+        
+    - name: Install PyYAML
+      run: pip install pyyaml
+      
+    - name: Make scripts executable
+      run: chmod +x scripts/*.sh
+      
+    - name: Run validation
+      run: ./scripts/validate.sh
+
+  test-consistency-check:
+    name: Test Consistency Check
+    runs-on: ubuntu-latest
+    needs: validate
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Start Minikube
+      uses: medyagh/setup-minikube@latest
+      with:
+        driver: docker
+        memory: 2048
+        cpus: 2
+        
+    - name: Verify Minikube
+      run: |
+        kubectl version --client
+        kubectl cluster-info
+        
+    - name: Make scripts executable
+      run: chmod +x scripts/*.sh
+      
+    - name: Deploy PostgreSQL
+      run: |
+        kubectl apply -f k8s/postgres-deployment.yaml
+        kubectl wait --for=condition=ready pod -l app=postgres --timeout=120s
+        sleep 10
+        
+    - name: Show deployment status
+      run: |
+        echo "Pods:"
+        kubectl get pods
+        echo ""
+        echo "Services:"
+        kubectl get services
+        
+    - name: Run consistency check
+      run: |
+        kubectl apply -f k8s/check-job.yaml
+        kubectl wait --for=condition=complete job/checksum-check-job --timeout=120s || true
+        
+    - name: Show check results
+      run: |
+        echo "Job status:"
+        kubectl get job checksum-check-job
+        echo ""
+        echo "Check logs:"
+        kubectl logs job/checksum-check-job
+        
+    - name: Verify check passed
+      run: |
+        # Check if the job completed successfully
+        if kubectl get job checksum-check-job -o jsonpath='{.status.succeeded}' | grep -q "1"; then
+          echo "✓ Consistency check passed"
+          exit 0
+        else
+          echo "✗ Consistency check failed"
+          kubectl logs job/checksum-check-job
+          exit 1
+        fi
+        
+    - name: Cleanup
+      if: always()
+      run: |
+        kubectl delete -f k8s/check-job.yaml --ignore-not-found=true
+        kubectl delete -f k8s/postgres-deployment.yaml --ignore-not-found=true
