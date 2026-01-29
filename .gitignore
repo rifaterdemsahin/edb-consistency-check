@@ -1,0 +1,24 @@
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+/tmp/
+*.tmp
+
+# Kubernetes
+*.kubeconfig
+
+# Local environment
+.env
+.env.local
