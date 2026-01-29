@@ -23,7 +23,8 @@ deploy:
 	@kubectl apply -f k8s/postgres-deployment.yaml
 	@echo "Waiting for PostgreSQL to be ready..."
 	@kubectl wait --for=condition=ready pod -l app=postgres --timeout=120s
-	@sleep 10
+	@echo "Waiting 60 seconds for database to fully initialize..."
+	@sleep 60
 	@echo "✓ PostgreSQL deployed and ready"
 
 check:

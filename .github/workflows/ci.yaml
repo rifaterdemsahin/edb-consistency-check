@@ -43,8 +43,8 @@ jobs:
       uses: medyagh/setup-minikube@latest
       with:
         driver: docker
-        memory: 2048
-        cpus: 2
+        memory: 4096
+        cpus: 4
         
     - name: Verify Minikube
       run: |
@@ -58,7 +58,8 @@ jobs:
       run: |
         kubectl apply -f k8s/postgres-deployment.yaml
         kubectl wait --for=condition=ready pod -l app=postgres --timeout=120s
-        sleep 10
+        echo "Waiting 60 seconds for database to fully initialize..."
+        sleep 60
         
     - name: Show deployment status
       run: |

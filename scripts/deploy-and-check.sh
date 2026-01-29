@@ -23,8 +23,8 @@ echo "2. Waiting for PostgreSQL pod to be ready..."
 kubectl wait --for=condition=ready pod -l app=postgres --timeout=120s
 
 # Give it a few more seconds to fully initialize
-echo "   Waiting for database initialization..."
-sleep 10
+echo "   Waiting 60 seconds for database to fully initialize..."
+sleep 60
 
 # Deploy and run the check job
 echo "3. Deploying consistency check job..."

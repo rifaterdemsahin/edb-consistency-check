@@ -37,7 +37,7 @@ if minikube status &> /dev/null; then
     echo "✓ Minikube is already running"
 else
     echo "Starting minikube..."
-    minikube start --driver=docker --memory=2048 --cpus=2
+    minikube start --driver=docker --memory=4096 --cpus=4
     echo "✓ Minikube started"
 fi
 
