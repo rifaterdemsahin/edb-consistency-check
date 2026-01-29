@@ -2,6 +2,16 @@
 
 This guide will help you get the EDB Consistency Check running in minutes.
 
+## Prerequisites
+
+**For GitHub Codespaces users:**
+- Use a 4-core or larger machine type (recommended: 4-core, 8GB RAM or higher)
+- This ensures sufficient resources for Minikube (4 CPUs, 4GB RAM allocation)
+
+**For local environments:**
+- Docker installed and running
+- At least 4GB RAM and 4 CPU cores available
+
 ## One-Command Setup
 
 For the fastest setup, use the Makefile:

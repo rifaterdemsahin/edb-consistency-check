@@ -22,8 +22,9 @@ Data checksums in PostgreSQL are a feature that helps detect data corruption. Wh
 
 ## Prerequisites
 
-- GitHub Codespaces or a Linux environment with Docker
+- GitHub Codespaces (4-core or larger machine type recommended) or a Linux environment with Docker
 - At least 4GB of available RAM (for Minikube with 4GB allocation)
+- At least 4 CPU cores available
 - Internet connection for downloading container images
 
 ## Quick Start
