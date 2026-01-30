@@ -1,8 +1,8 @@
-# Master Prompt: EDB Consistency Check Project
+# Master Prompt: PostgreSQL Consistency Check Project
 
 ## Project Overview
 
-Create a complete PostgreSQL/EnterpriseDB consistency checking tool that runs on Kubernetes (Minikube) in GitHub Codespaces. This project provides comprehensive database health checks including data checksums verification, table/index integrity validation, bloat analysis, and VACUUM recommendations.
+Create a complete PostgreSQL consistency checking tool that runs on Kubernetes (Minikube) in GitHub Codespaces. This project provides comprehensive database health checks including data checksums verification, table/index integrity validation, bloat analysis, and VACUUM recommendations.
 
 ## Project Purpose
 
@@ -93,13 +93,18 @@ Create a Kubernetes manifest with the following resources:
 
 **Secret (postgres-secret):**
 - Store database password securely
-- Key: POSTGRES_PASSWORD (postgres123)
+- Key: POSTGRES_PASSWORD
+- **Example value for testing**: "postgres123"
+- **IMPORTANT**: Use strong, randomly generated passwords in production
+- Never commit actual production passwords to version control
 
 **Deployment (postgres):**
 - Image: postgres:15-alpine
 - Replicas: 1
 - Container port: 5432
-- **Critical**: Add args `["-c", "data_checksums=on"]` to enable checksums
+- **Critical**: Add args `["-c", "data_checksums=on"]` to enable checksums during initialization
+  - Note: This works because PostgreSQL checks this setting during initdb when the data directory is empty
+  - On first startup with empty volume, PostgreSQL runs initdb with checksums enabled
 - Environment variables from ConfigMap and Secret
 - Volume: emptyDir for /var/lib/postgresql/data
 - Resource limits: 512Mi memory, 500m CPU
@@ -394,6 +399,8 @@ Triggers:
 
 ### Data Checksums
 - Enable during initialization with `-c data_checksums=on` argument
+  - This works when the data directory is empty (first startup)
+  - PostgreSQL passes this to initdb during initial cluster creation
 - Cannot be enabled on existing clusters without reinitializing
 - SQL command: `SHOW data_checksums;`
 - Returns "on" or "off"
@@ -404,7 +411,10 @@ Triggers:
 - Port: 5432
 - Database: testdb
 - User: postgres
-- Password: postgres123 (stored in Secret)
+- Password: [CHANGE-ME-IN-PRODUCTION] (stored in Secret)
+  - **SECURITY WARNING**: Never use simple passwords like "postgres123" in production
+  - Example uses "postgres123" for demonstration only
+  - Generate strong passwords for production deployments
 
 ### Color Coding
 Use ANSI escape codes in bash scripts:
@@ -511,16 +521,26 @@ The project is complete when:
 - **Documentation**: 6 markdown files, ~2000 lines
 - **Build Automation**: 1 Makefile, ~76 lines
 - **CI/CD**: 1 GitHub Actions workflow, ~102 lines
-- **Total**: ~3,278 lines of code and documentation
+- **Total**: ~3,278 lines of code and documentation across 18 files
 
 ## Special Considerations
 
 1. **Resource Requirements**: Ensure sufficient resources for Minikube (4GB RAM, 4 CPUs recommended)
 2. **Database Initialization**: Wait 60 seconds after pod ready for full initialization
 3. **Job Idempotency**: Delete existing jobs before recreating with same name
-4. **Security**: Use Secrets for passwords, never hardcode credentials
+4. **Security**: 
+   - Use Secrets for passwords, never hardcode credentials in code
+   - The example password "postgres123" is for demonstration only
+   - Generate strong, random passwords for any real deployment
+   - Never commit production credentials to version control
 5. **Portability**: Works in GitHub Codespaces, local Docker, or any Kubernetes cluster
-6. **Production Use**: This is a development/testing setup; production would need persistent volumes, HA, monitoring, etc.
+6. **Production Use**: This is a development/testing setup; production would need:
+   - Persistent volumes (not emptyDir)
+   - Strong, randomly generated passwords
+   - High availability configuration
+   - Monitoring and alerting
+   - Regular backups
+   - SSL/TLS encryption
 
 ## Usage Examples
 
